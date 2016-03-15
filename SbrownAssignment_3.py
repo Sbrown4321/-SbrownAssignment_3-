@@ -35,13 +35,7 @@ class my_hash_set:
 
     def __len__(self): return(self.__count)
 
-    #Add to dictionary of class not object
-    def __add(self, items):
-        h = self.__hash(items)
-        self.__items[h].append(items)
-        if (0.0 + self.__count) / self.__limit\
-            > .75: self.__rehash()
-
+    #Set iterator
     def __flattened(self):
         flattened = filter(lambda x: x != None, self.__items)
         flattened = [item for inner in flattened for item in inner]
@@ -49,6 +43,34 @@ class my_hash_set:
 
     def __iter__(self): return(iter(self.__flattened()))
     def __str__(self): return(str(self.__flattened()))
+
+    #Add helper
+    '''def __add(self, item):
+        assert item != self.__none
+
+        h = self.__hash(item)
+        if self.__items[h] == self.__none:
+            self.__items[h] = [item]
+        else:
+            self.__items[h].append(item)'''
+
+    def __rehash(self):
+        #if trace: print("rehasing before:", self.__items)
+        value = self.__flattened()
+
+        self.__limit *= 2
+        self.__items =[self.__none] * self.__limit
+
+        for i in value: self.__setitem__(i)
+
+    '''def add(self, item):
+        if item in self: return
+
+        self.__add(item)
+        self.__count += 1
+
+        if (0.0 + self.__count) / self.__limit > .75:
+            self.__rehash()'''
 
     def __setitem__(self, key, value):
         h = hash(key) % self.__limit
@@ -60,46 +82,55 @@ class my_hash_set:
 
         self.__count += 1
 
-        if (0.0 + self.__count) / self.__limit > .75: self.__rehash()
+        if (0.0 + self.__count) / self.__limit > 0.75: self.__rehash()
 
     def __hash(self, item): return(hash(item) % self.__limit)
 
-    def __rehash(self):
-        #if trace: print("rehasing before:", self.__items)
-        value = self.__flattened()
-
-        self.__limit *= 2
-        self.__items =[self.__none] * self.__limit
-
-        for i in value: self.__add(i)
-
-        #if trace: print("rehashing before:", self.__items)
-
-    #Need false statement variable rechecked
-    def __contains__(self, key):
-        h = self.__hash(key)
-        #if  self.__items[h] != self.__none:
-        for i in self.__items[h]:
-            if i == key: return True
-        return False
-
-    def __getitem__(self, key):
-
-        for i in key:
-            self.__setitem__(i)
-        return(self)
-
     def __delitem__(self, key):
-        if key not in self: raise(KeyError(key))
+        if key not in self: raise KeyError ("Item not in hash_set")
 
         h = self.__hash(key)
         self.__items[h].remove(key)
 
-        # not strictly necessary, but for consistency
         if self.__items[h] == []:
             self.__items[h] = self.__none
 
         self.__count -= 1
+
+    def __contains__(self, key):
+        h = self.__hash(key)
+        if  self.__items[h] != self.__none:
+            for i in self.__items[h]:
+                if i == key:return True
+        return False
+
+    def __getitem__(self, key):
+        if not h:
+            raise KeyError(key)
+        #What item is being fetched and what is unfetchable
+        if key >= 0 and key < self.__items:
+            return self.__items[key]
+        raise IndexError('Key out of range')
+
+        '''if self.__hash(key) is None:
+            raise TypeError('not indexable')
+        h = []
+        for item in self.__items:
+            if h == key:
+                h.append(item)
+        if not h:
+            raise KeyError(key)
+        if len(h) == 1:
+            return h[0]
+        else: return h
+
+        key = self.__hash(key) % len(self.__items)
+        h = []
+        while self.__items != None:
+            if self.__items[h] == key:
+                return self.__items[h]
+            h = (h + 1) % len(self.__items)
+        return None'''
 
 
 class test_my_hash_set(unittest.TestCase):
